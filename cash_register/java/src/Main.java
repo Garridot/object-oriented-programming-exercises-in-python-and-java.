@@ -81,6 +81,13 @@ class CashRegister {
     }
 
     public void addProduct(Product product, int quantity) {
+        /* 
+        Add a product to the cart and update the running total.
+        
+        Parameters:
+            product (Products): Object of type Products.
+            quantity (int): Quantity of the product to add.        
+        */    
         double subtotal = product.getPrice() * quantity;
         Map<String, Object> productDetails = new HashMap<>();
         productDetails.put("ID", product.getId());
@@ -93,6 +100,14 @@ class CashRegister {
     }
 
     public void updateProductQuantity (int productId, int newQuantity, List<Product> products){
+        /*
+        Update the quantity of a product in the cart.
+        
+        Parameters:
+            product_id (int): ID of the product to update.
+            new_quantity (int): New quantity of the product.
+            products(list): List of registered products.
+        */
         for (Map<String, Object> item : listProduct) {
             if ((int) item.get("ID") == productId) {
                 Product product = Product.findById(products, productId);
@@ -117,6 +132,12 @@ class CashRegister {
     }
 
     public void removeProduct (int productId){
+        /*
+        Remove a product from the cart.
+
+        Parameters:
+            product_id (int): ID of the product to delete.
+        */
         for (Map<String, Object> item : listProduct) {
             if ((int) item.get("ID") == productId) {
                 // Subtract the total of the removed product
@@ -131,6 +152,9 @@ class CashRegister {
     }
 
     public void viewCart(){
+        /*
+        Shows the contents of the cart and the accumulated total.
+        */
         if (listProduct.isEmpty()){
             System.out.println("Cart Empty");
         }else {
@@ -142,6 +166,9 @@ class CashRegister {
     }
 
     public void checkout () {
+        /*
+        Complete the purchase and empty the cart.
+        */
         if (listProduct.isEmpty()) {
             System.out.println("Cart empty. Nothing to checkout.");
         }else {
@@ -170,6 +197,9 @@ class ProductData {
 public class Main {
 
     public static List <Product> loadProducts (List <ProductData> productsData){
+        /*
+        Function to load products from a dictionary list.
+        */
         List<Product> productsList = new ArrayList<>();
         for (ProductData item : productsData) {
             try {
