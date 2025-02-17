@@ -133,14 +133,22 @@ class CashRegister:
                 logger.info(f"ID: {item['ID']}, PRODUCT: {item['PRODUCT']}, PRICE: ${item['PRICE']}, QUANTITY: {item['QUANTITY']}, TOTAL: ${item['TOTAL']}")
             logger.info(f"Total amount: ${self.total_amount}")
 
-    def checkout(self):
+    def apply_discount(self,percentage):
+        """"""
+        discount = self.total_amount * (percentage / 100)
+        self.total_amount -= discount
+        logger.info(f"The {percentage}% discount has been successfully applied.")
+        self.view_cart()           
+
+    def checkout(self,pay):
         """
         Complete the purchase and empty the cart.
         """
         if not self.list_product:
             logger.info("Cart empty. Nothing to checkout.")
         else:
-            self.view_cart()            
+            change = pay - self.total_amount    
+            logger.info(f"Change: ${change}")
             self.list_product.clear()  
             self.total_amount = 0         
 
@@ -169,18 +177,27 @@ products_data = [
     ]
 
 if __name__ == "__main__":
-    print("List of Products Items:")
+    
     products = load_products(products_data)
-    for p in products: print(p)
-
     cash_register = CashRegister()
 
-    while True:
-        print("""\n1. View list of products\n2. Add a product to the cart\n3. Update product quantity\n4. Remove product\n5. View the cart\n6. Checkout\n""")
+    while True:      
+        options = [
+            "1. View list of products", 
+            "2. Add a product to the cart",
+            "3. Update product quantity",
+            "4. Remove product",
+            "5. View the cart",
+            "6. Apply discount",
+            "7. Checkout",
+            ]
+        multiline_string = '\n'.join(options)
+        print(multiline_string)
         try:
             option = int(input("Enter an option: "))  
 
             if option == 1:
+                print("List of Products Items:")
                 for p in products: print(p)
             
             elif option == 2:
@@ -222,11 +239,30 @@ if __name__ == "__main__":
                 cash_register.view_cart()
             
             elif option == 6:
-                logger.info("\nChecking out...")
-                cash_register.checkout()
-                logger.info("Purchase completed successfully. Thank you for your purchase!")
-                break
+                try: 
+                    percentage = float(input("Enter the percentage discount to apply: "))
+                    if  1 < percentage < 99: 
+                        cash_register.apply_discount(percentage)
+                    else:    
+                        logger.error("Invalid input. Please enter a valid number between 1 and 99.")                         
+                except:
+                    logger.error("Invalid input. Please enter a valid number between 1 and 99.")  
+                    break     
             
+            elif option == 7:
+                CashRegister().view_cart()
+                if (cash_register.total_amount > 0):
+                    try: 
+
+                        pay = float(input("Enter the pay: "))
+                        if pay > cash_register.total_amount:
+                            cash_register.checkout(pay)
+                            logger.info("Purchase completed successfully. Thank you for your purchase!")
+                            break
+                        else: 
+                            logger.error("Invalid entry. Please enter an amount greater than the amount to be paid.")
+                    
+                    except: logger.error("Invalid input. Please enter a valid amount.")                                
             else:
                 logger.error(f"'{option}' is not a valid option. Please enter a number between 1 and 5.")
 

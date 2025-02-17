@@ -80,6 +80,11 @@ class CashRegister {
         this.totalAmount = 0.0;
     }
 
+    // getter method
+    public double getTotalAmount() {
+        return this.totalAmount;
+    }
+
     public void addProduct(Product product, int quantity) {
         /* 
         Add a product to the cart and update the running total.
@@ -165,14 +170,23 @@ class CashRegister {
         }
     }
 
-    public void checkout () {
+    public void applyDiscount (double percentage) {
+        double discount = totalAmount * (percentage / 100);
+
+        totalAmount -= discount;
+        System.out.println(String.format("The %.2f%% discount has been successfully applied.", percentage));
+        viewCart();
+    }
+
+    public void checkout (double pay) {
         /*
         Complete the purchase and empty the cart.
         */
         if (listProduct.isEmpty()) {
             System.out.println("Cart empty. Nothing to checkout.");
         }else {
-            viewCart();
+            double change = pay - totalAmount;
+            System.out.println(String.format("Change: $%.2f", change));
             listProduct.clear();
             totalAmount = 0;
         }
@@ -196,7 +210,7 @@ class ProductData {
 
 public class Main {
 
-    public static List <Product> loadProducts (List <ProductData> productsData){
+    public static List<Product> loadProducts(List<ProductData> productsData) {
         /*
         Function to load products from a dictionary list.
         */
@@ -214,7 +228,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        List <ProductData> productsData = Arrays.asList(
+        List<ProductData> productsData = Arrays.asList(
                 new ProductData(1, "Apple", 8.0, 10),
                 new ProductData(2, "Orange", 7.0, 20),
                 new ProductData(3, "Pineapple", 10.0, 8),
@@ -227,23 +241,35 @@ public class Main {
         );
 
         List<Product> products = loadProducts(productsData);
-        for (Product p : products) {
-            System.out.println(p.toString());
-        }
 
         CashRegister cashRegister = new CashRegister();
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.println("\n1. View list of products\n2. Add a product to the cart\n3. Update product quantity\n4. Remove product\n5. View the cart\n6. Checkout\n");
+
+            String[] options = {
+                    "1. View list of products",
+                    "2. Add a product to the cart",
+                    "3. Update product quantity",
+                    "4. Remove product",
+                    "5. View the cart",
+                    "6. Apply discount",
+                    "7. Checkout",
+            };
+            String multilineString = String.join("\n", options);
+            System.out.println(multilineString);
+
             try {
                 int option = Integer.parseInt(scanner.nextLine());
 
                 if (option == 1) {
+
                     for (Product p : products) {
                         System.out.println(p.toString());
                     }
+
                 } else if (option == 2) {
+
                     try {
                         System.out.println("\nEnter the ID of the product: ");
                         int productId = Integer.parseInt(scanner.nextLine());
@@ -264,7 +290,9 @@ public class Main {
                     } catch (NumberFormatException e) {
                         System.out.println("Invalid input. Please enter a valid number.");
                     }
+
                 } else if (option == 3) {
+
                     try {
                         System.out.println("Enter the ID of the product to update: ");
                         int productId = Integer.parseInt(scanner.nextLine());
@@ -275,7 +303,9 @@ public class Main {
                     } catch (NumberFormatException e) {
                         System.out.println("Invalid input. Please enter a valid number.");
                     }
+
                 } else if (option == 4) {
+
                     try {
                         System.out.println("Enter the ID of the product to remove: ");
                         int productId = Integer.parseInt(scanner.nextLine());
@@ -285,19 +315,48 @@ public class Main {
                         System.out.println("Invalid input. Please enter a valid number.");
                     }
                 } else if (option == 5) {
+
                     cashRegister.viewCart();
+
                 } else if (option == 6) {
-                    System.out.println("\nChecking out...");
-                    cashRegister.checkout();
-                    System.out.println("Purchase completed successfully. Thank you for your purchase!");
-                    break;
+                    try {
+                        System.out.println("Enter the percentage discount to apply: ");
+                        String input = scanner.nextLine(); // Read the input as a String
+                        double percentage = Double.parseDouble(input); // Parse the input to a double
+                        if (1 < percentage && percentage < 99) {
+                            cashRegister.applyDiscount(percentage);
+                        } else {
+                            System.out.println("Invalid input. Please enter a valid number between 1 and 99.");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid input. Please enter a valid number.");
+                    }
+
+                } else if (option == 7) {
+                    cashRegister.viewCart();
+                    if (cashRegister.getTotalAmount() > 0) {
+                        try {
+                            String input = scanner.nextLine(); // Read the input as a String
+                            double pay = Double.parseDouble(input); // Parse the input to a double
+
+                            if (pay > cashRegister.getTotalAmount()) {
+                                cashRegister.checkout(pay);
+                                System.out.println("Purchase completed successfully. Thank you for your purchase!");
+                                break;
+                            } else {
+                                System.out.println("Invalid entry. Please enter an amount greater than the amount to be paid.");
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid input. Please enter a valid amount.");
+                        }
+                    }
                 } else {
-                    System.out.println(String.format("'%d' is not a valid option. Please enter a number between 1 and 6.", option));
+                    System.out.println(String.format("'%d' is not a valid option. Please enter a number between 1 and 7.", option));
                 }
+
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a valid number.");
             }
         }
-        scanner.close();
     }
 }
